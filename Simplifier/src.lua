@@ -1,108 +1,61 @@
---[[ Simplifier.lua ]]
-
 local Simplifier = {}
 
+local genv = getgenv and getgenv() or _G
+
+local function resolve(name)
+    return genv["r" .. name] or genv[name] or nil
+end
+
 local function rcall(name, ...)
-    local fn = getgenv and getgenv()[name] or _G[name]
-    if type(fn) == "function" then
+    local fn = resolve(name)
+    if fn then
         return fn(...)
+    else
+        error("Simplifier | " .. name .. " not working (r" .. name .. " & " .. name .. " not found)")
     end
+end
+
+local function processArgs(args)
+    if not args then return "" end
+    local parts = {}
+    for _, v in ipairs(args) do
+        if v == "NL" then
+            table.insert(parts, "\n")
+        else
+            table.insert(parts, tostring(v))
+        end
+    end
+    return table.concat(parts)
 end
 
 Simplifier.Console = {}
 
--- Print({"text"})
-function Simplifier.Console.Print(args)
-    local text = (args and args[1]) or ""
-    rcall("rconsoleprint", text)
-    rcall("consoleprint", text)
-end
+function Simplifier.Console.Print(args)   rcall("consoleprint",    processArgs(args)) end
+function Simplifier.Console.Warn(args)    rcall("consolewarn",     processArgs(args)) end
+function Simplifier.Console.Error(args)   rcall("consoleerr",      processArgs(args)) end
+function Simplifier.Console.Info(args)    rcall("consoleinfo",     processArgs(args)) end
+function Simplifier.Console.Clear()       rcall("consoleclear")                       end
+function Simplifier.Console.Create()      rcall("consolecreate")                      end
+function Simplifier.Console.Destroy()     rcall("consoledestroy")                     end
+function Simplifier.Console.Input()       return rcall("consoleinput")                end
 
--- Warn({"text"})
-function Simplifier.Console.Warn(args)
-    local text = (args and args[1]) or ""
-    rcall("rconsolewarn", text)
-    rcall("consolewarn", text)
-end
-
--- Error({"text"})
-function Simplifier.Console.Error(args)
-    local text = (args and args[1]) or ""
-    rcall("rconsoleerr", text)
-    rcall("consoleerr", text)
-end
-
--- Title({"text"}) / Name({"text"}) / SetTitle({"text"})
-local function setConsoleTitle(args)
-    local text = (args and args[1]) or ""
-    rcall("rconsolesettitle", text)
-    rcall("rconsoletitle", text)
-    rcall("consolesettitle", text)
-    rcall("consoletitle", text)
-end
-Simplifier.Console.Title    = setConsoleTitle
-Simplifier.Console.Name     = setConsoleTitle
-Simplifier.Console.SetTitle = setConsoleTitle
-
--- Create()
-function Simplifier.Console.Create()
-    rcall("rconsolecreate")
-    rcall("consolecreate")
-end
-
--- Destroy()
-function Simplifier.Console.Destroy()
-    rcall("rconsoledestroy")
-    rcall("consoledestroy")
-end
-
--- Clear()
-function Simplifier.Console.Clear()
-    rcall("rconsoleclear")
-    rcall("consoleclear")
-end
-
--- Info({"text"})
-function Simplifier.Console.Info(args)
-    local text = (args and args[1]) or ""
-    rcall("rconsoleinfo", text)
-    rcall("consoleinfo", text)
-end
-
--- Input() → string
-function Simplifier.Console.Input()
-    local result = rcall("rconsoleinput")
-    if result == nil then
-        result = rcall("consoleinput")
-    end
-    return result
-end
+local function setTitle(args)             rcall("consolesettitle", processArgs(args)) end
+Simplifier.Console.Title    = setTitle
+Simplifier.Console.Name     = setTitle
+Simplifier.Console.SetTitle = setTitle
 
 local function doKick(reason, delay)
-    local Players = game:GetService("Players")
-    local lp = Players.LocalPlayer
+    local lp = game:GetService("Players").LocalPlayer
     if not lp then return end
-
     local function kick()
-        if reason and reason ~= "" then
-            lp:Kick(reason)
-        else
-            lp:Kick()
-        end
+        if reason ~= "" then lp:Kick(reason) else lp:Kick() end
     end
-
-    if delay and delay > 0 then
-        task.delay(delay, kick)
-    else
-        kick()
-    end
+    if delay and delay > 0 then task.delay(delay, kick) else kick() end
 end
 
 function Simplifier.Kick(args)
     local reason = (args and args[1]) or ""
-
     local kickObj = {}
-
     function kickObj.KD(kdArgs)
         local delay = (kdArgs and tonumber(kdArgs[1])) or 0
         doKick(reason, delay)
@@ -112,5 +65,4 @@ function Simplifier.Kick(args)
     return kickObj
 end
 
--- ─────────────────────────────────────────
 return Simplifier
