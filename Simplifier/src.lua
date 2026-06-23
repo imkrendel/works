@@ -1,4 +1,4 @@
---[[ Simplifier.lua ]]--
+--[[ Simplifier.lua ]]
 
 local Simplifier = {}
 
@@ -11,24 +11,28 @@ end
 
 Simplifier.Console = {}
 
+-- Print({"text"})
 function Simplifier.Console.Print(args)
     local text = (args and args[1]) or ""
-    rcall("rconsolprint", text)
-    rcall("consolprint", text)
+    rcall("rconsoleprint", text)
+    rcall("consoleprint", text)
 end
 
+-- Warn({"text"})
 function Simplifier.Console.Warn(args)
     local text = (args and args[1]) or ""
-    rcall("rconsolwarn", text)
-    rcall("consolwarn", text)
+    rcall("rconsolewarn", text)
+    rcall("consolewarn", text)
 end
 
+-- Error({"text"})
 function Simplifier.Console.Error(args)
     local text = (args and args[1]) or ""
-    rcall("rconsolerr", text)
-    rcall("consolerr", text)
+    rcall("rconsoleerr", text)
+    rcall("consoleerr", text)
 end
 
+-- Title({"text"}) / Name({"text"}) / SetTitle({"text"})
 local function setConsoleTitle(args)
     local text = (args and args[1]) or ""
     rcall("rconsolesettitle", text)
@@ -40,16 +44,19 @@ Simplifier.Console.Title    = setConsoleTitle
 Simplifier.Console.Name     = setConsoleTitle
 Simplifier.Console.SetTitle = setConsoleTitle
 
+-- Create()
 function Simplifier.Console.Create()
     rcall("rconsolecreate")
     rcall("consolecreate")
 end
 
+-- Destroy()
 function Simplifier.Console.Destroy()
     rcall("rconsoledestroy")
     rcall("consoledestroy")
 end
 
+-- Clear()
 function Simplifier.Console.Clear()
     rcall("rconsoleclear")
     rcall("consoleclear")
@@ -62,8 +69,9 @@ function Simplifier.Console.Info(args)
     rcall("consoleinfo", text)
 end
 
+-- Input() → string
 function Simplifier.Console.Input()
-    local result = rcall("rconsolinput")
+    local result = rcall("rconsoleinput")
     if result == nil then
         result = rcall("consoleinput")
     end
@@ -100,9 +108,9 @@ function Simplifier.Kick(args)
         doKick(reason, delay)
         return kickObj
     end
-
     doKick(reason, 0)
     return kickObj
 end
 
+-- ─────────────────────────────────────────
 return Simplifier
