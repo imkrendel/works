@@ -30,16 +30,41 @@ local function processArgs(args)
     return table.concat(parts)
 end
 
+local function resolveAsset(input)
+    if not input or input == "" then return "" end
+    local str = tostring(input)
+    
+    if tonumber(str) then
+        return "rbxassetid://" .. str
+    elseif str:match("^rbxassetid://") or str:match("^http") or str:match("^assetgame") then
+        return str
+    else
+        local customAssetFn = resolve("getcustomasset")
+        if customAssetFn then
+            return customAssetFn(str)
+        else
+            warn("Simplifier | getcustomasset not found for path: " .. str)
+            return str
+        end
+    end
+end
+
+local function getOrCreateClothing(className)
+    local lp = game:GetService("Players").LocalPlayer
+    if not lp or not lp.Character then return nil end
+    return lp.Character:FindFirstChildOfClass(className) or Instance.new(className, lp.Character)
+end
+
 Simplifier.Console = {}
 
 function Simplifier.Console.Print(args)   rcall("consoleprint",    processArgs(args)) end
 function Simplifier.Console.Warn(args)    rcall("consolewarn",     processArgs(args)) end
 function Simplifier.Console.Error(args)   rcall("consoleerr",      processArgs(args)) end
 function Simplifier.Console.Info(args)    rcall("consoleinfo",     processArgs(args)) end
-function Simplifier.Console.Clear()       rcall("consoleclear")                       end
-function Simplifier.Console.Create()      rcall("consolecreate")                      end
-function Simplifier.Console.Destroy()     rcall("consoledestroy")                     end
-function Simplifier.Console.Input()       return rcall("consoleinput")                end
+function Simplifier.Console.Clear()       rcall("consoleclear")                        end
+function Simplifier.Console.Create()      rcall("consolecreate")                       end
+function Simplifier.Console.Destroy()     rcall("consoledestroy")                      end
+function Simplifier.Console.Input()       return rcall("consoleinput")                 end
 
 local function setTitle(args)             rcall("consolesettitle", processArgs(args)) end
 Simplifier.Console.Title    = setTitle
@@ -65,6 +90,50 @@ function Simplifier.Kick(args)
     end
     doKick(reason, 0)
     return kickObj
+end
+
+Simplifier.Change = {}
+
+local currentShirt = nil
+local currentPants = nil
+
+local function applyCurrentOutfit(char)
+    if currentShirt then
+        local shirt = char:FindFirstChildOfClass("Shirt") or Instance.new("Shirt", char)
+        shirt.ShirtTemplate = resolveAsset(currentShirt)
+    end
+    if currentPants then
+        local pants = char:FindFirstChildOfClass("Pants") or Instance.new("Pants", char)
+        pants.PantsTemplate = resolveAsset(currentPants)
+    end
+end
+
+local lp = game:GetService("Players").LocalPlayer
+if lp then
+    lp.CharacterAdded:Connect(applyCurrentOutfit)
+    if lp.Character then applyCurrentOutfit(lp.Character) end
+end
+
+function Simplifier.Change.Shirt(args)
+    local asset = args and args[1]
+    if not asset then return end
+    currentShirt = asset
+    
+    local shirt = getOrCreateClothing("Shirt")
+    if shirt then
+        shirt.ShirtTemplate = resolveAsset(asset)
+    end
+end
+
+function Simplifier.Change.Pants(args)
+    local asset = args and args[1]
+    if not asset then return end
+    currentPants = asset
+    
+    local pants = getOrCreateClothing("Pants")
+    if pants then
+        pants.PantsTemplate = resolveAsset(asset)
+    end
 end
 
 return Simplifier
