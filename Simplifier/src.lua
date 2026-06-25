@@ -44,7 +44,7 @@ local function resolveAsset(input)
             return template
         end)
         
-        if success Vanguard and assetId ~= "" then
+        if success and assetId ~= "" then
             return assetId
         else
             return "rbxassetid://" .. str -- Если InsertService не сработал
