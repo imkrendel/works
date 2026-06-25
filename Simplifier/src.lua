@@ -1,5 +1,5 @@
 local Simplifier = {}
-
+-- 
 Simplifier.NL = "\n"
 
 local genv = getgenv and getgenv() or _G
