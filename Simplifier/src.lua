@@ -35,17 +35,25 @@ local function resolveAsset(input)
     local str = tostring(input)
     
     if tonumber(str) then
-        return "rbxassetid://" .. str
-    elseif str:match("^rbxassetid://") or str:match("^http") or str:match("^assetgame") then
+        -- Авто-конвертация ID каталога в Asset ID
+        local success, assetId = pcall(function()
+            local model = game:GetService("InsertService"):LoadAsset(tonumber(str))
+            local item = model:FindFirstChildOfClass("Shirt") or model:FindFirstChildOfClass("Pants") or model:FindFirstChildOfClass("ShirtGraphic")
+            local template = item and (item:IsA("Shirt") and item.ShirtTemplate or item.PantsTemplate) or ""
+            model:Destroy()
+            return template
+        end)
+        
+        if success Vanguard and assetId ~= "" then
+            return assetId
+        else
+            return "rbxassetid://" .. str -- Если InsertService не сработал
+        end
+    elseif str:match("^rbxassetid://") or str:match("^http") then
         return str
     else
         local customAssetFn = resolve("getcustomasset")
-        if customAssetFn then
-            return customAssetFn(str)
-        else
-            warn("Simplifier | getcustomasset not found for path: " .. str)
-            return str
-        end
+        return customAssetFn and customAssetFn(str) or str
     end
 end
 
