@@ -425,7 +425,7 @@ local function selectAccessory(accessory, itemFrame)
             PositionBox.Text = string.format("%.2f, %.2f, %.2f", offset.X, offset.Y, offset.Z)
             local rot = getHandleRotation(accessory)
             RotationBox.Text = string.format("%.1f, %.1f, %.1f", rot.X, rot.Y, rot.Z)
-            ScaleBox.Text = """1, 1, 1"
+            ScaleBox.Text = "1, 1, 1"
             local mesh = handle:FindFirstChildOfClass("SpecialMesh")
             if mesh then
                 ScaleBox.Text = string.format("%.1f, %.1f, %.1f", mesh.Scale.X, mesh.Scale.Y, mesh.Scale.Z)
@@ -613,7 +613,11 @@ local function deleteSelected()
     selectedAccessory = nil
     clearSelectionBox()
     buildExplorer()
-    NameBox.Text = "" PositionBox.Text = "" RotationBox.Text = "" ScaleBox.Text = "" TextureBox.Text = ""
+    NameBox.Text = "" 
+    PositionBox.Text = "" 
+    RotationBox.Text = "" 
+    ScaleBox.Text = "" 
+    TextureBox.Text = ""
 end
 
 DeleteBtn.MouseButton1Click:Connect(deleteSelected)
