@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>xRManager</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="loading-screen">
+    <img id="loading-icon" class="loading-icon" src="{{ICON_DATA_URI}}" onerror="this.style.display='none'">
+    <div class="spinner"></div>
+    <div class="loading-text">Загрузка...</div>
+  </div>
+
+  <div class="titlebar pywebview-drag-region">
+    <div class="title-left">
+      <span class="app-dot" id="app-dot"></span>
+      <img id="app-icon-img" class="app-icon-img hidden" src="{{ICON_DATA_URI}}" onerror="this.style.display='none'">
+      <span class="app-title">xRManager</span>
+    </div>
+    <div class="window-controls">
+      <button id="btn-win-min" class="win-btn" title="Свернуть">&#65372;</button>
+      <button id="btn-win-max" class="win-btn" title="На весь экран">&#9723;</button>
+      <button id="btn-win-close" class="win-btn close" title="Закрыть">&#10005;</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="bans">Баны</button>
+    <button class="tab-btn" data-tab="profiles">Профили</button>
+  </div>
+
+  <!-- ==================== БАНЫ ==================== -->
+  <section id="tab-bans" class="tab-content active">
+    <div class="toolbar">
+      <input id="ban-search" type="text"
+             placeholder="Поиск по Steam64 или правилу (например r4.2, r*.*)">
+      <button id="btn-add-ban" class="btn primary">+ Добавить</button>
+    </div>
+    <div id="bans-list" class="list grid bans-grid"></div>
+  </section>
+
+  <!-- ==================== ПРОФИЛИ ==================== -->
+  <section id="tab-profiles" class="tab-content">
+    <div class="toolbar">
+      <input id="profile-search" type="text" placeholder="Поиск по Steam64, нику, заметке или тегу">
+      <button id="btn-add-profile" class="btn primary">+ Добавить</button>
+    </div>
+    <div id="profiles-list" class="list grid"></div>
+  </section>
+
+  <!-- ==================== МОДАЛКА: НОВЫЙ БАН ==================== -->
+  <div id="modal-ban" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Новый бан</h2>
+
+      <label>Steam64 (id)</label>
+      <input id="ban-steam64" type="text" placeholder="76561198000000000">
+
+      <label>Причина (правило)</label>
+      <textarea id="ban-reason" placeholder="Например: r4.2 - читы"></textarea>
+
+      <label>Доки (откат (видео) / скриншот)</label>
+      <div class="file-row">
+        <input id="ban-doc-path" type="text" readonly placeholder="Файл не выбран">
+        <button id="btn-pick-doc" class="btn">Обзор</button>
+      </div>
+
+      <div id="ban-error" class="error"></div>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-ban" class="btn">Отменить</button>
+        <button id="btn-save-ban" class="btn primary">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА: НОВЫЙ ПРОФИЛЬ ==================== -->
+  <div id="modal-profile" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Новый профиль</h2>
+
+      <label>Steam64 (id)</label>
+      <input id="profile-steam64" type="text" placeholder="76561198000000000">
+
+      <div id="profile-error" class="error"></div>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-profile" class="btn">Отменить</button>
+        <button id="btn-save-profile" class="btn primary">Добавить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА: ПРЕДПРОСМОТР ДОКА ==================== -->
+  <div id="modal-preview" class="modal-overlay hidden">
+    <div class="modal preview-modal">
+      <div id="preview-body" class="preview-body"></div>
+      <div class="modal-actions">
+        <button id="btn-close-preview" class="btn">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА: ЗАМЕТКА ПРОФИЛЯ ==================== -->
+  <div id="modal-note" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Заметка</h2>
+      <div class="mono small" id="note-steamid"></div>
+      <textarea id="note-text" placeholder="Например: подозрение в читах, накопительные баллы..."></textarea>
+      <div class="modal-actions">
+        <button id="btn-cancel-note" class="btn">Отменить</button>
+        <button id="btn-save-note" class="btn primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="resize-handle resize-e" data-dir="e"></div>
+  <div class="resize-handle resize-s" data-dir="s"></div>
+  <div class="resize-handle resize-se" data-dir="se"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
