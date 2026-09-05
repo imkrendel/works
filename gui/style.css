@@ -50,7 +50,6 @@ body {
 }
 .app-icon-img.hidden { display: none; }
 
-/* ---------- экран загрузки ---------- */
 #loading-screen {
   position: fixed;
   inset: 0;
@@ -87,7 +86,6 @@ body {
   letter-spacing: .3px;
 }
 
-/* ---------- ручки изменения размера окна (frameless-окно теряет системные) ---------- */
 .resize-handle { position: fixed; z-index: 998; background: transparent; }
 .resize-e { top: 40px; right: 0; width: 6px; height: calc(100% - 40px); cursor: ew-resize; }
 .resize-s { bottom: 0; left: 0; height: 6px; width: 100%; cursor: ns-resize; }
@@ -202,7 +200,6 @@ textarea { min-height: 70px; resize: vertical; font-family: inherit; }
 .mono { font-family: Consolas, "Courier New", monospace; }
 .card-actions { margin-top: 8px; display: flex; gap: 6px; }
 
-/* ---------- компактная карточка бана ---------- */
 .card-top {
   display: flex;
   align-items: center;
@@ -251,7 +248,6 @@ textarea { min-height: 70px; resize: vertical; font-family: inherit; }
 .doc-row:hover { border-color: var(--accent); }
 .doc-thumb-icon { width: 20px; height: 20px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
 
-/* ---------- модалка предпросмотра ---------- */
 .preview-modal { width: min(720px, 90vw); }
 .preview-body {
   display: flex; align-items: center; justify-content: center;
@@ -261,7 +257,6 @@ textarea { min-height: 70px; resize: vertical; font-family: inherit; }
 .preview-body img, .preview-body video { max-width: 100%; max-height: 70vh; object-fit: contain; }
 .preview-body .empty { color: var(--text-dim); padding: 40px 20px; text-align: center; }
 
-/* ---------- заметки и теги профиля ---------- */
 .note-btn { margin-top: 6px; align-self: flex-start; }
 .note-preview {
   font-size: 12px; color: var(--text-dim); font-style: italic;
@@ -316,7 +311,6 @@ textarea { min-height: 70px; resize: vertical; font-family: inherit; }
 .old-names { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
 .profile-actions { margin-top: 6px; }
 
-/* ---------- модалки ---------- */
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,.55);
