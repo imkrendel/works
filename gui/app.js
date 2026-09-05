@@ -3,7 +3,6 @@ function $all(sel) { return document.querySelectorAll(sel); }
 
 let api;
 
-// Если иконка подгрузилась (assets/ico.ico найден) - показать её в шапке вместо точки
 (function initTitlebarIcon() {
   const img = document.getElementById('app-icon-img');
   const dot = document.getElementById('app-dot');
@@ -26,9 +25,8 @@ window.addEventListener('pywebviewready', async () => {
   hideLoadingScreen();
 });
 
-// ---------------- Табы (с анимацией перехода) ----------------
 const TAB_ORDER = ['bans', 'profiles'];
-const TAB_SHIFT = 20; // px
+const TAB_SHIFT = 20;
 
 function switchTab(targetName, btn) {
   const current = document.querySelector('.tab-content.active');
@@ -46,7 +44,7 @@ function switchTab(targetName, btn) {
   target.style.display = 'block';
   target.style.opacity = '0';
   target.style.transform = `translateX(${forward ? TAB_SHIFT : -TAB_SHIFT}px)`;
-  void target.offsetWidth; // форсируем reflow перед включением transition
+  void target.offsetWidth;
 
   target.style.transition = 'opacity .2s ease, transform .2s ease';
   requestAnimationFrame(() => {
@@ -54,8 +52,7 @@ function switchTab(targetName, btn) {
     target.style.opacity = '1';
     target.style.transform = 'translateX(0)';
   });
-
-  // Старая вкладка уезжает в противоположную сторону и прячется
+  
   if (current) {
     current.classList.remove('active');
     current.style.transition = 'opacity .18s ease, transform .18s ease';
@@ -74,7 +71,6 @@ $all('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab, btn));
 });
 
-// ---------------- Изменение размера окна (frameless-окно теряет системные ручки) ----------------
 (function initResize() {
   let dir = null, startX, startY, startW, startH;
   let queued = false, pendingW, pendingH;
@@ -117,7 +113,6 @@ $all('.tab-btn').forEach(btn => {
   });
 })();
 
-// ---------------- Кастомная шапка окна ----------------
 $('#btn-win-min').addEventListener('click', () => api.window_minimize());
 $('#btn-win-max').addEventListener('click', () => api.window_toggle_max());
 $('#btn-win-close').addEventListener('click', () => api.window_close());
@@ -159,7 +154,7 @@ async function openDocPreview(docPath, docName) {
 }
 
 $('#btn-close-preview').addEventListener('click', () => {
-  $('#preview-body').innerHTML = ''; // остановить видео и освободить память
+  $('#preview-body').innerHTML = '';
   $('#modal-preview').classList.add('hidden');
 });
 
@@ -169,7 +164,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ================== БАНЫ ==================
 async function loadBans(query) {
   const list = query ? await api.search_bans(query) : await api.list_bans();
   const el = $('#bans-list');
@@ -213,7 +207,6 @@ async function loadBans(query) {
       </div>`;
     el.appendChild(card);
 
-    // Лениво подгружаем маленькую миниатюру для картинок прямо в карточку
     if (b.doc && b.doc_path && isImage(b.doc)) {
       api.get_doc_preview(b.doc_path).then(res => {
         if (res.ok && res.kind === 'image') {
@@ -270,7 +263,6 @@ $('#btn-save-ban').addEventListener('click', async () => {
   loadBans($('#ban-search').value);
 });
 
-// ================== ПРОФИЛИ ==================
 let currentProfiles = [];
 let currentNoteSteam = null;
 
