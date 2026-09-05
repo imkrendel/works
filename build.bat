@@ -1,6 +1,6 @@
 @echo off
-REM Сборка xRManager.exe в один файл со своей иконкой.
-REM Запускать из папки проекта (там же, где main.py).
+REM
+REM
 
 pip install --upgrade pyinstaller
 
@@ -17,5 +17,5 @@ pyinstaller ^
   main.py
 
 echo.
-echo Готово. Файл: dist\xRManager.exe
+echo Файл - .\dist\xRManager
 pause
