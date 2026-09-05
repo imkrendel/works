@@ -11,9 +11,6 @@ from datetime import datetime
 import requests
 import webview
 
-# ---------------------------------------------------------------------------
-# Пути хранения данных: %appdata%\xRManager\...
-# ---------------------------------------------------------------------------
 APPDATA = os.getenv('APPDATA') or os.path.expanduser('~/.xrmanager')
 BASE_DIR = os.path.join(APPDATA, 'xRManager')
 CONTENT_DIR = os.path.join(BASE_DIR, 'content')
@@ -33,13 +30,7 @@ def ru_date(dt: datetime) -> str:
 
 
 class Api:
-    """Все методы этого класса доступны из JS как window.pywebview.api.*"""
-
-    # ------------------------------------------------------------------ #
-    # БАНЫ
-    # ------------------------------------------------------------------ #
     def pick_file(self):
-        """Открыть системный диалог выбора файла (скрин/видео отката)."""
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             file_types=(
@@ -123,12 +114,8 @@ class Api:
         all_bans = self.list_bans()
         if not query:
             return all_bans
-
-        # Поиск по Steam64 - любая цифра/часть id
         if query.isdigit():
             return [b for b in all_bans if query in b['steam64']]
-
-        # Поиск по правилу, поддерживает маску '*': r4.2 / r5.1 / r*.*
         pattern = query.lower()
         if '*' not in pattern:
             pattern = f'*{pattern}*'
@@ -143,17 +130,16 @@ class Api:
 
     def open_folder(self, path):
         try:
-            os.startfile(path)  # noqa: только Windows, что соответствует %appdata%
+            os.startfile(path)
             return {'ok': True}
         except Exception as e:
             return {'ok': False, 'error': str(e)}
 
     IMAGE_EXT = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'}
     VIDEO_EXT = {'.mp4', '.mkv', '.avi', '.webm', '.mov'}
-    VIDEO_PREVIEW_LIMIT = 40 * 1024 * 1024  # 40 МБ - выше просто предложим открыть файл
+    VIDEO_PREVIEW_LIMIT = 40 * 1024 * 1024
 
     def get_doc_preview(self, doc_path):
-        """Вернуть содержимое дока как data-URI для встроенного предпросмотра."""
         if not doc_path or not os.path.isfile(doc_path):
             return {'ok': False, 'error': 'Файл не найден'}
 
@@ -179,9 +165,6 @@ class Api:
 
         return {'ok': True, 'kind': 'other'}
 
-    # ------------------------------------------------------------------ #
-    # ПРОФИЛИ
-    # ------------------------------------------------------------------ #
     def _profile_path(self, steam64):
         return os.path.join(PROFILES_DIR, steam64, 'profile.json')
 
@@ -298,9 +281,6 @@ class Api:
         self._save_profile(profile)
         return {'ok': True, 'tags': profile['tags']}
 
-    # ------------------------------------------------------------------ #
-    # УПРАВЛЕНИЕ ОКНОМ (для собственной шапки вместо системной)
-    # ------------------------------------------------------------------ #
     def window_minimize(self):
         webview.windows[0].minimize()
         return {'ok': True}
@@ -325,21 +305,15 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def resource_path(*parts):
-    """Путь к встроенному ресурсу (gui/, assets/), корректный и при обычном
-    запуске python main.py, и внутри собранного PyInstaller-экзешника
-    (--onefile распаковывает данные во временную папку sys._MEIPASS)."""
     base = getattr(sys, '_MEIPASS', SCRIPT_DIR)
     return os.path.join(base, *parts)
 
 
 ICON_PATH = resource_path('assets', 'ico.ico')
-
-# Цвет фона окна на время инициализации - чтобы не мелькал белый экран
 LOADING_BG = '#2b2d33'
 
 
 def get_icon_data_uri():
-    """base64 data-uri иконки, чтобы вставить её прямо в HTML (без файлового сервера)."""
     if not os.path.isfile(ICON_PATH):
         return None
     try:
@@ -351,14 +325,6 @@ def get_icon_data_uri():
 
 
 def set_windows_app_id():
-    """Задать свой AppUserModelID процессу.
-
-    Это главная причина, по которой Windows показывает в панели задач
-    иконку python.exe вместо иконки окна: для процессов без явного
-    AppUserModelID таскбар группирует их по имени exe (python.exe) и
-    берёт его иконку, даже если у самого окна выставлена своя. Установка
-    ID должна произойти ДО создания окна.
-    """
     if os.name != 'nt':
         return
     try:
@@ -384,39 +350,25 @@ def _to_int_handle(h):
 
 
 def try_set_taskbar_icon(window):
-    """Попытка заменить стандартную иконку Python в панели задач Windows.
-
-    Это best-effort: разные версии/бэкенды pywebview по-разному хранят
-    нативный handle окна, поэтому перебираем известные варианты и тихо
-    выходим, если ни один не сработал. Для гарантированной замены иконки
-    (в том числе в собранном .exe) используй PyInstaller с флагом
-    --icon=assets/ico.ico - см. README.
-    """
     if os.name != 'nt' or not os.path.isfile(ICON_PATH):
         return
     try:
         import ctypes
 
         hwnd = None
-
-        # 1) Прямые атрибуты на самом объекте Window
         for attr in ('hwnd', '_hwnd'):
             hwnd = _to_int_handle(getattr(window, attr, None))
             if hwnd:
                 break
-
-        # 2) window.native (WinForms Form / IntPtr Handle)
         if not hwnd:
             native = getattr(window, 'native', None)
             if native is not None:
                 hwnd = _to_int_handle(getattr(native, 'Handle', None))
 
-        # 3) window.gui.hwnd
         if not hwnd:
             gui = getattr(window, 'gui', None)
             hwnd = _to_int_handle(getattr(gui, 'hwnd', None) if gui else None)
 
-        # 4) Внутренний реестр окон edgechromium-бэкенда pywebview
         if not hwnd:
             try:
                 from webview.platforms import edgechromium as _edge
@@ -446,13 +398,6 @@ def try_set_taskbar_icon(window):
 
 
 def load_gui_html():
-    """Собрать index.html + style.css + app.js в одну HTML-строку.
-
-    Это обходит известную проблему pywebview, когда его встроенный локальный
-    сервер отдаёт 404 на index.html/ассеты из подпапки gui (особенно на
-    Windows с Edge WebView2). Передавая готовую HTML-строку через
-    webview.create_window(html=...), мы вообще не используем файловый сервер.
-    """
     gui_dir = resource_path('gui')
 
     with open(os.path.join(gui_dir, 'index.html'), encoding='utf-8') as f:
@@ -478,8 +423,6 @@ def load_gui_html():
 
 
 def _create_window(api):
-    """Создать окно, постепенно откатываясь на более простой набор параметров,
-    если установленная версия pywebview не поддерживает какой-то из них."""
     kwargs = dict(
         html=load_gui_html(), js_api=api,
         width=1050, height=720, min_size=(850, 600),
@@ -521,8 +464,6 @@ if __name__ == '__main__':
             pass
 
     if used_kwargs.get('hidden'):
-        # Показываем окно только когда содержимое полностью готово -
-        # без белого "пустого" окна при старте.
         try:
             window.events.loaded += _reveal
         except Exception:
